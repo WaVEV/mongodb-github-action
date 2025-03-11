@@ -13,6 +13,15 @@ MONGODB_CONTAINER_NAME=$8
 # `mongosh` is used starting from MongoDB 5.x
 MONGODB_CLIENT="mongosh --quiet"
 
+<<<<<<< Updated upstream
+=======
+PORT_FLAG="--port"
+if echo "$MONGODB_IMAGE" | grep -q "mongodb-atlas"; then
+  PORT_FLAG="-p"
+fi
+
+
+>>>>>>> Stashed changes
 if [ -z "$MONGODB_IMAGE" ]; then
   echo ""
   echo "Missing MongoDB image in the [mongodb-image] input. Received value: $MONGODB_IMAGE"
@@ -60,7 +69,11 @@ wait_for_mongodb () {
   fi
 
   # until ${WAIT_FOR_MONGODB_COMMAND}
+<<<<<<< Updated upstream
   until docker exec --tty $MONGODB_CONTAINER_NAME $MONGODB_CLIENT --port $MONGODB_PORT $MONGODB_ARGS --eval "db.serverStatus()"
+=======
+  until docker exec --tty $MONGODB_CONTAINER_NAME $MONGODB_CLIENT $PORT_FLAG $MONGODB_PORT $MONGODB_ARGS --eval "db.serverStatus()"
+>>>>>>> Stashed changes
   do
     echo "."
     sleep 1
@@ -82,7 +95,6 @@ wait_for_mongodb () {
 #  docker rm -f $MONGODB_CONTAINER_NAME
 # fi
 
-
 if [ -z "$MONGODB_REPLICA_SET" ]; then
   echo "::group::Starting single-node instance, no replica set"
   echo "  - port [$MONGODB_PORT]"
@@ -92,7 +104,11 @@ if [ -z "$MONGODB_REPLICA_SET" ]; then
   echo "  - container-name [$MONGODB_CONTAINER_NAME]"
   echo ""
 
+<<<<<<< Updated upstream
   docker run --name $MONGODB_CONTAINER_NAME --publish $MONGODB_PORT:$MONGODB_PORT -e MONGO_INITDB_DATABASE=$MONGODB_DB -e MONGO_INITDB_ROOT_USERNAME=$MONGODB_USERNAME -e MONGO_INITDB_ROOT_PASSWORD=$MONGODB_PASSWORD --detach $MONGODB_IMAGE:$MONGODB_VERSION --port $MONGODB_PORT
+=======
+  docker run --name $MONGODB_CONTAINER_NAME --publish $MONGODB_PORT:$MONGODB_PORT -e MONGO_INITDB_DATABASE=$MONGODB_DB -e MONGO_INITDB_ROOT_USERNAME=$MONGODB_USERNAME -e MONGO_INITDB_ROOT_PASSWORD=$MONGODB_PASSWORD --detach $MONGODB_IMAGE:$MONGODB_VERSION $PORT_FLAG $MONGODB_PORT
+>>>>>>> Stashed changes
 
   if [ $? -ne 0 ]; then
       echo "Error starting MongoDB Docker container"
@@ -113,7 +129,11 @@ echo "  - replica set [$MONGODB_REPLICA_SET]"
 echo ""
 
 
+<<<<<<< Updated upstream
 docker run --name $MONGODB_CONTAINER_NAME --publish $MONGODB_PORT:$MONGODB_PORT --detach $MONGODB_IMAGE:$MONGODB_VERSION --port $MONGODB_PORT --replSet $MONGODB_REPLICA_SET
+=======
+docker run --name $MONGODB_CONTAINER_NAME --publish $MONGODB_PORT:$MONGODB_PORT --detach $MONGODB_IMAGE:$MONGODB_VERSION $PORT_FLAG $MONGODB_PORT --replSet $MONGODB_REPLICA_SET
+>>>>>>> Stashed changes
 
 if [ $? -ne 0 ]; then
     echo "Error starting MongoDB Docker container"
@@ -125,7 +145,11 @@ wait_for_mongodb
 
 echo "::group::Initiating replica set [$MONGODB_REPLICA_SET]"
 
+<<<<<<< Updated upstream
 docker exec --tty $MONGODB_CONTAINER_NAME $MONGODB_CLIENT --port $MONGODB_PORT --eval "
+=======
+docker exec --tty $MONGODB_CONTAINER_NAME $MONGODB_CLIENT $PORT_FLAG $MONGODB_PORT --eval "
+>>>>>>> Stashed changes
   rs.initiate({
     \"_id\": \"$MONGODB_REPLICA_SET\",
     \"members\": [ {
@@ -140,5 +164,9 @@ echo "::endgroup::"
 
 
 echo "::group::Checking replica set status [$MONGODB_REPLICA_SET]"
+<<<<<<< Updated upstream
 docker exec --tty $MONGODB_CONTAINER_NAME $MONGODB_CLIENT --port $MONGODB_PORT --eval "rs.status()"
+=======
+docker exec --tty $MONGODB_CONTAINER_NAME $MONGODB_CLIENT $PORT_FLAG $MONGODB_PORT --eval "rs.status()"
+>>>>>>> Stashed changes
 echo "::endgroup::"
