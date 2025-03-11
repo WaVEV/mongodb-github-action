@@ -18,6 +18,13 @@ if echo "$MONGODB_IMAGE" | grep -q "mongodb-atlas"; then
   PORT_FLAG="-p"
 fi
 
+USER_ENVIROMENT_FLAG="MONGO_INITDB_ROOT_USERNAME"
+PASSWORD_ENVIROMENT_FLAG="MONGO_INITDB_ROOT_PASSWORD"
+if echo "$MONGODB_IMAGE" | grep -q "mongodb-atlas"; then
+  USER_ENVIROMENT_FLAG="MONGODB_INITDB_ROOT_USERNAME"
+  PASSWORD_ENVIROMENT_FLAG="MONGODB_INITDB_ROOT_PASSWORD"
+fi
+
 
 if [ -z "$MONGODB_IMAGE" ]; then
   echo ""
@@ -66,7 +73,7 @@ wait_for_mongodb () {
   fi
 
   # until ${WAIT_FOR_MONGODB_COMMAND}
-  until docker exec --tty $MONGODB_CONTAINER_NAME $MONGODB_CLIENT $PORT_FLAG $MONGODB_PORT $MONGODB_ARGS --eval "db.serverStatus()"
+  until docker exec --tty $MONGODB_CONTAINER_NAME $MONGODB_CLIENT --port $MONGODB_PORT $MONGODB_ARGS --eval "db.serverStatus()"
   do
     echo "."
     sleep 1
@@ -97,7 +104,7 @@ if [ -z "$MONGODB_REPLICA_SET" ]; then
   echo "  - container-name [$MONGODB_CONTAINER_NAME]"
   echo ""
 
-  docker run --name $MONGODB_CONTAINER_NAME --publish $MONGODB_PORT:$MONGODB_PORT -e MONGO_INITDB_DATABASE=$MONGODB_DB -e MONGO_INITDB_ROOT_USERNAME=$MONGODB_USERNAME -e MONGO_INITDB_ROOT_PASSWORD=$MONGODB_PASSWORD --detach $MONGODB_IMAGE:$MONGODB_VERSION $PORT_FLAG $MONGODB_PORT
+  docker run --name $MONGODB_CONTAINER_NAME $PORT_FLAG $MONGODB_PORT --publish $MONGODB_PORT:$MONGODB_PORT -e MONGO_INITDB_DATABASE=$MONGODB_DB -e $USER_ENVIROMENT_FLAG=$MONGODB_USERNAME -e $PASSWORD_ENVIROMENT_FLAG=$MONGODB_PASSWORD --detach $MONGODB_IMAGE:$MONGODB_VERSION
 
   if [ $? -ne 0 ]; then
       echo "Error starting MongoDB Docker container"
@@ -117,8 +124,7 @@ echo "  - version [$MONGODB_VERSION]"
 echo "  - replica set [$MONGODB_REPLICA_SET]"
 echo ""
 
-
-docker run --name $MONGODB_CONTAINER_NAME --publish $MONGODB_PORT:$MONGODB_PORT --detach $MONGODB_IMAGE:$MONGODB_VERSION $PORT_FLAG $MONGODB_PORT --replSet $MONGODB_REPLICA_SET
+docker run --name $MONGODB_CONTAINER_NAME $PORT_FLAG $MONGODB_PORT --publish $MONGODB_PORT:$MONGODB_PORT --detach $MONGODB_IMAGE:$MONGODB_VERSION --replSet $MONGODB_REPLICA_SET
 
 if [ $? -ne 0 ]; then
     echo "Error starting MongoDB Docker container"
